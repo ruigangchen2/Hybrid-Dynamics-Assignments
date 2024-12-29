@@ -28,7 +28,8 @@ function [M,B,W,W_d,Fd] = dynamics_mat(q,q_d)
     M(3,3) = Ic+m*d^2;
     
     B = zeros(4,1);
-    B(3) = -m*d*th_d*(x_d*cos(th)+y_d*sin(th));
+    B(1) = -m*d*th_d^2*cos(th);
+    B(2) = -m*d*th_d^2*sin(th);
     
     Fd = c*[x_d-b*(th_d+ph_d)*sin(th+ph)-l*th_d*sin(th)
             y_d+b*(th_d+ph_d)*cos(th+ph)+l*th_d*cos(th)
