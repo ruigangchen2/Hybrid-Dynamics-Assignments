@@ -1,4 +1,4 @@
-% HW2 Ruigang Chen Ben Sarfati
+% HW2 Q3 Ruigang Chen &  Ben Sarfati
 clear all; close all; clc
 
 %% solve ode45
@@ -45,7 +45,7 @@ rC_dd = [x_dd-th_d.^2*d.*cos(th)-th_dd*d.*sin(th) y_dd-th_d.^2*d.*sin(th)+th_dd*
 e1tag = [cos(th) sin(th)];
 e1tagtag = [cos(th+ph) sin(th+ph)];
 
-%% plots a)
+%% plots Q3 a)
  
 close all; 
 
@@ -58,7 +58,7 @@ ylabel('$\phi $ [$^{\circ}$]', 'Interpreter', 'latex', 'fontsize', 30);
 grid on;
 saveas(gcf, 'q3a.png');
 
-%% plots b)
+%% plots Q3 b)
 figure;
 plot(t,th*180/pi,'LineWidth',2);
 set(gcf,'color','w');
@@ -68,7 +68,7 @@ ylabel('$\theta $ [$^{\circ}$]', 'Interpreter', 'latex', 'fontsize', 30);
 grid on;
 saveas(gcf, 'q3b.png');
 
-%% plots c)
+%% plots Q3 c)
 figure;
 plot(t,dot(rP_d,e1tag,2),'LineWidth',2);
 set(gcf,'color','w');
@@ -78,7 +78,7 @@ ylabel('Velocity [$\frac{m}{s}$]', 'Interpreter', 'latex', 'fontsize', 30);
 grid on;
 saveas(gcf, 'q3c.png');
 
-%% plots d)
+%% plots Q3 d)
 figure;
 plot(x,y,'LineWidth',2);
 set(gcf,'color','w');
@@ -89,7 +89,7 @@ grid on;
 axis equal;
 saveas(gcf, 'q3d.png');
 
-%% plots e)
+%% plots Q3 e)
 figure;
 plot(t,lambda1,'LineWidth',2); hold on;
 plot(t,lambda2,'LineWidth',2);
@@ -103,7 +103,7 @@ lgd.Interpreter = 'latex';
 lgd.FontSize = 20;  
 saveas(gcf, 'q3e.png');
 
-%% plots f)
+%% plots Q3 f)
 figure;
 plot(t(1:100:100001),m*rC_dd(1:100:100001,1),'o','LineWidth',2); hold on;
 plot(t,-lambda1.*e1tag(:,2)-lambda2.*e1tagtag(:,2),'LineWidth',1);
@@ -118,7 +118,7 @@ lgd.Interpreter = 'latex';
 lgd.FontSize = 20;  
 saveas(gcf, 'q3f.png');
 
-%% plots g)
+%% plots Q3 g)
 figure;
 plot(t,slippageVelocity(:,1),'LineWidth',2); hold on;
 plot(t,slippageVelocity(:,2),'LineWidth',2);
