@@ -1,4 +1,4 @@
-function [M,B,W,W_d] = dynamics_mat(q,q_d)
+function [M,B,W,W_d,Fd] = dynamics_mat(q,q_d)
 
     %Q3
     c = 0;
@@ -32,7 +32,7 @@ function [M,B,W,W_d] = dynamics_mat(q,q_d)
     B(1) = c*(-b*sin(ph+th)*(ph_d+th_d)+3*x_d-l*sin(th)*th_d)-m*d*th_d^2*cos(th);
     B(2) = c*(b*cos(ph+th)*(ph_d+th_d)+3*y_d+l*cos(th)*th_d)-m*d*th_d^2*sin(th);
     B(3) = c*(b^2*(ph_d+th_d)+l^2*th_d+0.5*w^2*th_d+b*cos(ph+th)*y_d-b*sin(ph+th)*x_d+l*cos(th)*y_d-l*sin(th)*x_d+b*l*cos(ph)*ph_d+2*b*l*cos(ph)*th_d);
-    B(4) = b*c*(-x_d*sin(ph+th)+y_d*cos(ph+th)+b*(ph_d+th_d)+l*th_d*cos(ph));
+    B(4) = b*c*(-x_d*sin(ph_th)+y_d*cos(ph+th)+b*(ph_d+th_d)+l*th_d*cos(ph));
     
     W = zeros(2,4);
     W(1,1) = -sin(th);
@@ -43,11 +43,12 @@ function [M,B,W,W_d] = dynamics_mat(q,q_d)
     W(2,4) = b;
     
     W_d = zeros(2,4);
-    W_d(1,1) = -th_d*cos(th);
-    W_d(1,2) = -th_d*sin(th);
-    W_d(2,1) = -(ph_d+th_d)*cos(ph+th);
-    W_d(2,2) = -(ph_d+th_d)*sin(ph+th);
-    W_d(2,3) = -l*ph_d*sin(ph);
-    
-    
+    W_d(1,1) = -sin(th);
+    W_d(1,2) = cos(th);
+    W_d(2,1) = -sin(ph+th);
+    W(2,2) = cos(ph+th);
+    W(2,3) = b+l*cos(ph);
+    W(2,4) = b;
+    W_d = [-th_d*cos(th) -th_d*sin(th) 0 0 
+        -(th_d+ph_d)*cos(th+ph) -(th_d+ph_d)*sin(th+ph) -l*ph_d*sin(ph) 0];
 end
