@@ -1,4 +1,4 @@
-% HW2 Q4 Ruigang Chen & Ben Sarfati
+% HW2 Q6 Ruigang Chen & Ben Sarfati
 clear all; close all; clc
 
 %% solve ode45
@@ -75,7 +75,7 @@ lambda2_c = lambda_data_c(2,:)';
 
 
 
-d = 0.25;
+d = 0.15;
 l = 0.6;
 b = 0.2;
 w = 0.25;
@@ -91,28 +91,14 @@ rC_dd_c = [x_dd_c - theta_d_c.^2 .* d .* cos(theta_c) - theta_dd_c .* d .* sin(t
 e1tag_c = [cos(theta_c) sin(theta_c)];
 e1tagtag_c = [cos(theta_c+phi) sin(theta_c+phi)];
 
+
 rF_d_c = [x_d_c - theta_d_c .* l .* sin(theta_c) - b .* sin(theta_c + phi) .* (theta_d_c + phi_d) y_d_c + theta_d_c .* l .* cos(theta_c) + b .* cos(theta_c + phi) .* (theta_d_c + phi_d)];
 rR_d_c = [x_d_c + 0.5 .* w .* theta_d_c .* cos(theta_c) y_d_c + 0.5 .* w .* theta_d_c .* sin(theta_c)];
 rL_d_c = [x_d_c - 0.5 .* w .* theta_d_c .* cos(theta_c) y_d_c - 0.5 .* w .* theta_d_c .* sin(theta_c)];
 
 F_d_c = (rF_d_c+rR_d_c+rL_d_c).*e1tag_c;
 
-%% plots Q4 b)
-figure;
-plot(t,theta*180/pi,'b','LineWidth',2);
-hold on;
-plot(t_c,theta_c*180/pi,'r','LineWidth',2);
-set(gcf,'color','w');
-title('Body Orientation Angle vs. Time','fontsize',20)
-xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
-ylabel('$\theta $ [$^{\circ}$]', 'Interpreter', 'latex', 'fontsize', 20);
-grid on;
-lgd = legend('c=0','c=1','Location','SouthEast');  
-lgd.Interpreter = 'latex';  
-lgd.FontSize = 20;  
-saveas(gcf, 'q4b.png');
-
-%% plots Q4 c)
+%% plots Q6 c)
 figure;
 plot(t,dot(rP_d,e1tag,2),'b','LineWidth',2);
 hold on;
@@ -125,8 +111,8 @@ grid on;
 lgd = legend('c=0','c=1','Location','SouthEast');  
 lgd.Interpreter = 'latex';  
 lgd.FontSize = 20; 
-saveas(gcf, 'q4c.png');
-%% plots Q4 d)
+saveas(gcf, 'q6c.png');
+%% plots Q6 d)
 figure;
 plot(x,y,'b','LineWidth',2);
 hold on;
@@ -140,59 +126,4 @@ lgd = legend('c=0','c=1','Location','SouthEast');
 lgd.Interpreter = 'latex';  
 lgd.FontSize = 20; 
 axis equal;
-saveas(gcf, 'q4d.png');
-%% plots Q4 e)
-figure;
-plot(t,lambda1,'b','LineWidth',2);
-hold on;
-plot(t,lambda2,'r','LineWidth',2);
-hold on;
-plot(t_c,lambda1_c,'b-.','LineWidth',2);
-hold on;
-plot(t_c,lambda2_c,'r-.','LineWidth',2);
-set(gcf,'color','w');
-title('Constraint Forces vs. Time','fontsize',20)
-xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
-ylabel('Constraint Force [N]', 'Interpreter', 'latex', 'fontsize', 30);
-grid on;
-lgd = legend('$\lambda_1$','$\lambda_2$','$\lambda_{1} \ \ (c=1)$','$\lambda_{2} \ \ (c=1)$','Location','SouthEast');  
-lgd.Interpreter = 'latex';  
-lgd.FontSize = 20;  
-saveas(gcf, 'q4e.png');
-%% plots Q4 f)
-m = 30; 
-figure;
-plot(t(1:100:60001),m*rC_dd(1:100:60001,1),'r-','LineWidth',2); 
-hold on;
-plot(t,-lambda1.*e1tag(:,2)-lambda2.*e1tagtag(:,2),'b:','LineWidth',2);
-hold on; 
-plot(t_c(1:100:60001),m*rC_dd_c(1:100:60001,1),'k-','LineWidth',2); 
-hold on;
-plot(t_c,(-lambda1_c.*e1tag_c(:,2)-lambda2_c.*e1tagtag_c(:,2)-F_d_c(:,1)),'g:','LineWidth',2);
-set(gcf,'color','w');
-title('Ground Reaction Force vs. Time','fontsize',20)
-xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
-ylabel('$GRF_x$ [N]', 'Interpreter', 'latex', 'fontsize', 30);
-grid on;
-lgd = legend('$m\mathbf{\ddot r_C}\cdot\mathbf{e_1}$',...
-    '$(\lambda_1\mathbf{e^,_2}+\lambda_2\mathbf{e^{,,}_2}+F_d)\cdot\mathbf{e_1}$',...
-    '$m\mathbf{\ddot r_C}\cdot\mathbf{e_1} \ \ (c=1)$',...
-    '$(\lambda_1\mathbf{e^,_2}+\lambda_2\mathbf{e^{,,}_2}+F_d)\cdot\mathbf{e_1}  \ \ (c=1)$',...
-    'Location','SouthWest');  
-lgd.Interpreter = 'latex';  
-lgd.FontSize = 15;  
-saveas(gcf, 'q4f.png');
-%% plots tau(t)
-figure;
-plot(t,tau_data,'r','LineWidth',2); 
-hold on;
-plot(t_c,tau_data_c,'b','LineWidth',2); 
-set(gcf,'color','w');
-title('Torque Data','fontsize',20)
-xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
-ylabel('$\tau$ [N$\cdot$m]', 'Interpreter', 'latex', 'fontsize', 30);
-grid on;
-lgd = legend('$c=0$','$c=1$','Location','NorthWest');  
-lgd.Interpreter = 'latex';  
-lgd.FontSize = 20;  
-saveas(gcf, 'tau.png');
+saveas(gcf, 'q6d.png');
