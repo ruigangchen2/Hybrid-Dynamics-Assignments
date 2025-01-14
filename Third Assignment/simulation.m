@@ -216,3 +216,42 @@ lgd = legend('COM','contact point','contact normal','friction cone','boundary li
 lgd.Interpreter = 'latex';  
 lgd.FontSize = 20;  
 saveas(gcf, 'Task IV.png');
+
+%% Task 5
+
+h = 5;
+rc = [1;h];
+mg = 1;
+mu = 0.4;
+gamma = atan(mu);
+
+th_rez = 0.01*pi;
+th = th_rez:th_rez:2*pi;
+fd_max = range_fd_eq([r1 r2 rc],alpha,mu*ones(2,1),th);
+fd_allowable = min(fd_max);
+
+figure; 
+plot(th,fd_max,'*-')
+xticks(0:pi/2:3*pi); 
+xticklabels({'0','\pi/2','\pi','3\pi/2','2\pi'});
+set(gcf,'color','w');
+title('Maximum Disturbance Force Magnitude vs. Angle','fontsize',20);
+ylabel('|F_d|','fontsize',16)
+xlabel('[rad]','fontsize',16)
+grid on;
+
+h = 0:0.1:10;
+fd_allowable = zeros(size(h));
+for i = 1:length(h)
+    rc = [1;h(i)];
+    fd_max = range_fd_eq([r1 r2 rc],alpha,mu*ones(2,1),th);
+    fd_allowable(i) = min(fd_max);
+end
+
+figure; 
+plot(h,fd_allowable,'*-')
+set(gcf,'color','w');
+title('Maximum Disturbance Force Magnitude Across All Angles vs. COM height','fontsize',16);
+ylabel('|F_d|','fontsize',16)
+xlabel('h','fontsize',16)
+grid on;
