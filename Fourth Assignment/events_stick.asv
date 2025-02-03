@@ -1,0 +1,17 @@
+function [value,isterminal,direction] = events_stick(t,X)
+% event 1 is left slip (?) AKA when -lambda_t equals or exceeds mu*lambda_n
+% event 2 is right slip AKA when lambda_t equals or exceeds mu*lambda_n
+
+q = X(1:4);
+q_d = X(5:8);
+[M,B,G,W,~,~] = dynamics_mat(q,q_d);
+lambda = (W*(M\W'))\(W*(M\(B+G)));
+
+value(1) = -lambda(1)-mu*lambda(2);
+isterminal(1) = 0;
+direction(1) = -1;
+
+value(2) = lambda(1)-mu*lambda(2);
+isterminal(2) = 0;
+direction(2) = 1; %1?
+
