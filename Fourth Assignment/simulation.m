@@ -155,7 +155,8 @@ legend('ratio','ratio limits','fontsize',30,'location','ne')
 %% Q6
 
 wbreak = wslip;
-while something()
+separating = 0;
+while ~separating
     wbreak = wbreak+rez;
     remainingTime = t_eval;
     currentX = [0; 0; 0; 0; 0; 0; 0; wbreak];
@@ -181,8 +182,11 @@ while something()
             currentX = ye;
             finalX = [finalX;X(1:end-1,:)];
             transitionTimes(end+1) = te;
-            sgn_slip = sign(1.5-ie);
-            sticking = 0;
+
+            %using ie:
+            %if we are going back to sticking, sticking = 1
+            %if we are separating, separating = 1; break
+            
         end
 
 
