@@ -4,7 +4,9 @@ clear all; close all; clc
 %% globals and parameters
 
 global sgn_slip
+global mu
 sgn_slip = 1;
+mu = 0.05;
 
 rez = 0.01;
 
@@ -23,14 +25,14 @@ te = [];
 wslip = 0;
 while isempty(te)
     wslip = wslip+rez;
-    X0 = [0; 0; 0; 0; 0; 0; 0; wslip];  %  [x; y; theta; phi; dx; dy; dtheta; dphi];
+    X0 = [0; R; 0; 0; 0; 0; 0; wslip];  %  [x; y; theta; phi; dx; dy; dtheta; dphi];
     options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_stick);         
-    [t, X,te,ye,ie] = ode45(@sys_stick, t_eval, X0, options); 
+    [t,X,te,ye,ie] = ode45(@sys_stick, t_eval, X0, options); 
 end
 w0 = 0.9*wslip;
-X0 = [0; 0; 0; 0; 0; 0; 0; w0];  %  [x; y; theta; phi; dx; dy; dtheta; dphi];
+X0 = [0; R; 0; 0; 0; 0; 0; w0];  %  [x; y; theta; phi; dx; dy; dtheta; dphi];
 options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_stick);         
-[t, X,te,ye,ie] = ode45(@sys_stick, t_eval, X0, options); 
+[t,X,te,ye,ie] = ode45(@sys_stick, t_eval, X0, options); 
 Lambda = zeros(length(t),2);
 for i = 1:length(t)
     [~,Lambda(i,1:2)] = dyn_sol_stick(X(i,1:4)',X(i,5:8)',t(i));
@@ -83,9 +85,9 @@ legend('ratio','ratio limits','fontsize',30,'location','ne')
 % saveas(gcf, 'q5dstick.png');
 
 w0 = wslip;
-X0 = [0; 0; 0; 0; 0; 0; 0; w0];  %  [x; y; theta; phi; dx; dy; dtheta; dphi];
+X0 = [0; R; 0; 0; 0; 0; 0; w0];  %  [x; y; theta; phi; dx; dy; dtheta; dphi];
 options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_stick);         
-[t, X,te,ye,ie] = ode45(@sys_stick, t_eval, X0, options); 
+[t,X,te,ye,ie] = ode45(@sys_stick, t_eval, X0, options); 
 Lambda = zeros(length(t),2);
 for i = 1:length(t)
     [~,Lambda(i,1:2)] = dyn_sol_stick(X(i,1:4)',X(i,5:8)',t(i));
@@ -150,37 +152,78 @@ legend('ratio','ratio limits','fontsize',30,'location','ne')
 % grid on;
 % % saveas(gcf, 'q5bstick.png');
 
+
+%Checking plot
+figure;
+plot(tspan(1):dt:(remainingTime(1)-dt),finalX(:,1),'LineWidth',2); hold on
+plot(tspan(1):dt:(remainingTime(1)-dt),finalX(:,2),'LineWidth',2);
+set(gcf,'color','w');
+title('x and y vs. Time; $\omega_{slip}$','fontsize',20,'Interpreter','latex')
+xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
+ylabel('[m]', 'Interpreter', 'latex', 'fontsize', 30);
+xlim(tspan)
+legend('x','y')
+grid on;
+% saveas(gcf, 'q5cslip.png');
+
 %% Q6
 
 wbreak = wslip;
+separating = 0;
+finalTime = 10;
 while something()
     wbreak = wbreak+rez;
-    remainingTime = t_eval;
-    currentX = [0; 0; 0; 0; 0; 0; 0; wbreak];
+    currentTime = 0;
+    currentX = [0; R; 0; 0; 0; 0; 0; wbreak];
     finalX = [];
+    finalLambda = [];
+    finalTimes = [];
     transitionTimes = [];
+    transitionXs = [];
     
     %Check that we are not already slipping
     sticking = events_stick(remainingTime(1),currentX)<0;
-    while remainingTime(1)~=tspan(2)
+    while currentTime<finalTime
         if sticking
             options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_stick);         
-            [t, X,te,ye,ie] = ode45(@sys_stick, remainingTime, currentX, options);
-            remainingTime = te:dt:tspan(2);
+            [t,X,te,ye,ie] = ode45(@sys_stick, [currentTime finalTime], currentX, options);
+            Lambda = zeros(length(t),2);
+            for i = 1:length(t)
+                [~,Lambda(i,1:2)] = dyn_sol_stick(X(i,1:4)',X(i,5:8)',t(i));
+            end
+
+            currentTime = te;
             currentX = ye;
-            finalX = [finalX;X(1:end-1,:)];
+            finalX = [finalX;X(1:end-1,:)]; %transition state will be considered to belong to the next state
+            finalLambda = [finalLambda;Lambda(1:end-1,:)];
+            finalTimes = [finalTimes;t(1:end-1)];
             transitionTimes(end+1) = te;
+            transitionXs(end+1,:) = ye;
             sgn_slip = sign(1.5-ie);
             sticking = 0;
         else
             options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_slip);         
-            [t, X,te,ye,ie] = ode45(@sys_slip, remainingTime, currentX, options);
-            remainingTime = te:dt:tspan(2);
+            [t,X,te,ye,ie] = ode45(@sys_slip, [currentTime finalTime], currentX, options);
+            Lambda = zeros(length(t),2);
+            for i = 1:length(t)
+                [~,Lambda(i,2)] = dyn_sol_slip(X(i,1:4)',X(i,5:8)',t(i));
+                Lambda(i,1) = -sgn_slip*mu*Lambda(i,2);
+            end
+
+            currentTime = te;
             currentX = ye;
             finalX = [finalX;X(1:end-1,:)];
+            finalLambda = [finalLambda;Lambda(1:end-1,:)];
+                        finalTimes = [finalTimes;t(1:end-1)];
             transitionTimes(end+1) = te;
-            sgn_slip = sign(1.5-ie);
-            sticking = 0;
+            transitionXs(end+1,:) = ye;
+            
+            
+
+            %using ie:
+            %if we are going back to sticking, sticking = 1
+            %if we are separating, separating = 1; break
+            
         end
 
 
@@ -197,114 +240,3 @@ for i = 1:length(t)
 end
 
 
-%% Label data
-
-m = 30;  
-d = 0.25;
-
-x = X(:,1);
-y = X(:,2);
-th = X(:,3);
-ph = X(:,4);
-x_d = X(:,5);
-y_d = X(:,6);
-th_d = X(:,7);
-ph_d = X(:,8);
-x_dd = X_d(:,1);
-y_dd = X_d(:,2);
-th_dd = X_d(:,3);
-ph_dd = X_d(:,4);
-lambda1 = Lambda(:,1);
-lambda2 = Lambda(:,2);
-
-% rP_d = [x_d y_d];
-% rC_dd = [x_dd-th_d.^2*d.*cos(th)-th_dd*d.*sin(th) y_dd-th_d.^2*d.*sin(th)+th_dd*d.*cos(th)];
-% e1tag = [cos(th) sin(th)];
-% e1tagtag = [cos(th+ph) sin(th+ph)];
-
-%% plots Q3 a)
- 
-close all; 
-
-figure;
-plot(t,ph*180/pi,'LineWidth',2);
-set(gcf,'color','w');
-title('Steering Angle vs. Time','fontsize',20)
-xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
-ylabel('$\phi $ [$^{\circ}$]', 'Interpreter', 'latex', 'fontsize', 30);
-grid on;
-saveas(gcf, 'q3a.png');
-
-%% plots Q3 b)
-figure;
-plot(t,th*180/pi,'LineWidth',2);
-set(gcf,'color','w');
-title('Body Orientation Angle vs. Time','fontsize',20)
-xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
-ylabel('$\theta $ [$^{\circ}$]', 'Interpreter', 'latex', 'fontsize', 30);
-grid on;
-saveas(gcf, 'q3b.png');
-
-%% plots Q3 c)
-figure;
-plot(t,dot(rP_d,e1tag,2),'LineWidth',2);
-set(gcf,'color','w');
-title('Velocity of P parallel to back link vs. Time','fontsize',20)
-xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
-ylabel('Velocity [$\frac{m}{s}$]', 'Interpreter', 'latex', 'fontsize', 30);
-grid on;
-saveas(gcf, 'q3c.png');
-
-%% plots Q3 d)
-figure;
-plot(x,y,'LineWidth',2);
-set(gcf,'color','w');
-title('Trajectory of P','fontsize',20)
-xlabel('$\mathbf{r_P}\cdot\mathbf{e_1}$ [m]', 'Interpreter', 'latex', 'fontsize', 20);
-ylabel('$\mathbf{r_P}\cdot\mathbf{e_2}$ [m]', 'Interpreter', 'latex', 'fontsize', 20);
-grid on;
-axis equal;
-saveas(gcf, 'q3d.png');
-
-%% plots Q3 e)
-figure;
-plot(t,lambda1,'LineWidth',2); hold on;
-plot(t,lambda2,'LineWidth',2);
-set(gcf,'color','w');
-title('Constraint Forces vs Time','fontsize',20)
-xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
-ylabel('Constraint Force [N]', 'Interpreter', 'latex', 'fontsize', 30);
-grid on;
-lgd = legend('$\lambda_1$','$\lambda_2$','Location','SouthEast');  
-lgd.Interpreter = 'latex';  
-lgd.FontSize = 20;  
-saveas(gcf, 'q3e.png');
-
-%% plots Q3 f)
-figure;
-plot(t(1:100:100001),m*rC_dd(1:100:100001,1),'o','LineWidth',2); hold on;
-plot(t,-lambda1.*e1tag(:,2)-lambda2.*e1tagtag(:,2),'LineWidth',1);
-set(gcf,'color','w');
-title('Ground Reaction Force in $\mathbf{e_1}$ vs Time','fontsize',20,'Interpreter','latex')
-xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
-ylabel('$GRF_x$ [N]', 'Interpreter', 'latex', 'fontsize', 30);
-grid on;
-lgd = legend('$m\mathbf{\ddot r_C}\cdot\mathbf{e_1}$',...
-    '$(\lambda_1\mathbf{e^,_2}+\lambda_2\mathbf{e^{,,}_2}+F_d)\cdot\mathbf{e_1}$','Location','SouthEast');  
-lgd.Interpreter = 'latex';  
-lgd.FontSize = 20;  
-saveas(gcf, 'q3f.png');
-
-%% plots Q3 g)
-figure;
-plot(t,slippageVelocity(:,1),'LineWidth',2); hold on;
-plot(t,slippageVelocity(:,2),'LineWidth',2);
-set(gcf,'color','w');
-title('Slippage velocity of back and front wheels vs Time','fontsize',20)
-xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
-ylabel('Velocity [$\frac{m}{s}$]', 'Interpreter', 'latex', 'fontsize', 30);
-grid on;
-lgd = legend('Back wheels','Front wheel','Location','SouthEast');  
-lgd.Interpreter = 'latex';  
-lgd.FontSize = 20;  
-saveas(gcf, 'q3g.png');
