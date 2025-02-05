@@ -152,19 +152,7 @@ legend('ratio','ratio limits','fontsize',30,'location','ne')
 % grid on;
 % % saveas(gcf, 'q5bstick.png');
 
-%Checking plot
-figure;
-% plot(finalTimes,finalX(:,5),'LineWidth',2); hold on
-% plot(finalTimes(1:end-1),diff(finalX(:,6)),'*-','LineWidth',2);
-plot(t,q_dd(:,2),'*-','LineWidth',2);
-set(gcf,'color','w');
-title('x and y vs. Time; $\omega_{slip}$','fontsize',20,'Interpreter','latex')
-xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
-ylabel('[m]', 'Interpreter', 'latex', 'fontsize', 30);
-xlim(tspan)
-legend('x','y')
-grid on;
-% saveas(gcf, 'q5cslip.png');
+
 
 %% Q6
 
@@ -229,6 +217,32 @@ finalTime = 10;
 
     % end
 % end
+
+%Checking plot
+figure;
+% plot(finalTimes,finalX(:,5),'LineWidth',2); hold on
+% plot(finalTimes(1:end-1),diff(finalX(:,6)),'*-','LineWidth',2);
+plot(t,q_dd(:,2),'*-','LineWidth',2);
+set(gcf,'color','w');
+title('x and y stuff vs. Time; $\omega_{slip}$','fontsize',20,'Interpreter','latex')
+xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
+ylabel('[m]', 'Interpreter', 'latex', 'fontsize', 30);
+xlim(tspan)
+legend('x','y')
+grid on;
+% saveas(gcf, 'q5cslip.png');%Checking plot
+figure;
+% plot(finalTimes,finalX(:,5),'LineWidth',2); hold on
+% plot(finalTimes(1:end-1),diff(finalX(:,6)),'*-','LineWidth',2);
+plot(t,q_dd(:,2),'*-','LineWidth',2);
+set(gcf,'color','w');
+title('x and y stuff vs. Time; $\omega_{slip}$','fontsize',20,'Interpreter','latex')
+xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
+ylabel('[m]', 'Interpreter', 'latex', 'fontsize', 30);
+xlim(tspan)
+legend('x','y')
+grid on;
+% saveas(gcf, 'q5cslip.png');
 
 % w0 = 0.9*wbreak;
 % X0 = [0; 0; 0; 0; 0; 0; 0; w0];  %  [x; y; theta; phi; dx; dy; dtheta; dphi];
