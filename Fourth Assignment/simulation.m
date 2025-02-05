@@ -17,6 +17,9 @@ mu = 0.05;
 tspan = [0 10]; 
 dt = 0.001; 
 t_eval = tspan(1):dt:tspan(2);
+op_stick = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_stick);         
+op_slip = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_slip);         
+
 
 %% Q5
 
@@ -25,14 +28,12 @@ te = [];
 wslip = 0;
 while isempty(te)
     wslip = wslip+rez;
-    X0 = [0; R; 0; 0; 0; 0; 0; wslip];  %  [x; y; theta; phi; dx; dy; dtheta; dphi];
-    options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_stick);         
-    [t,X,te,ye,ie] = ode45(@sys_stick, t_eval, X0, options); 
+    X0 = [0 R 0 0 0 0 0 wslip];  %  [x; y; theta; phi; dx; dy; dtheta; dphi];
+    [t,X,te,ye,ie] = ode45(@sys_stick, t_eval, X0, op_stick); 
 end
 w0 = 0.9*wslip;
 X0 = [0; R; 0; 0; 0; 0; 0; w0];  %  [x; y; theta; phi; dx; dy; dtheta; dphi];
-options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_stick);         
-[t,X,te,ye,ie] = ode45(@sys_stick, t_eval, X0, options); 
+[t,X,te,ye,ie] = ode45(@sys_stick, t_eval, X0, op_stick); 
 Lambda = zeros(length(t),2);
 for i = 1:length(t)
     [~,Lambda(i,1:2)] = dyn_sol_stick(X(i,1:4)',X(i,5:8)',t(i));
@@ -86,8 +87,7 @@ legend('ratio','ratio limits','fontsize',30,'location','ne')
 
 w0 = wslip;
 X0 = [0; R; 0; 0; 0; 0; 0; w0];  %  [x; y; theta; phi; dx; dy; dtheta; dphi];
-options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_stick);         
-[t,X,te,ye,ie] = ode45(@sys_stick, t_eval, X0, options); 
+[t,X,te,ye,ie] = ode45(@sys_stick, t_eval, X0, op_stick); 
 Lambda = zeros(length(t),2);
 for i = 1:length(t)
     [~,Lambda(i,1:2)] = dyn_sol_stick(X(i,1:4)',X(i,5:8)',t(i));
@@ -152,11 +152,11 @@ legend('ratio','ratio limits','fontsize',30,'location','ne')
 % grid on;
 % % saveas(gcf, 'q5bstick.png');
 
-
 %Checking plot
 figure;
-plot(tspan(1):dt:(remainingTime(1)-dt),finalX(:,1),'LineWidth',2); hold on
-plot(tspan(1):dt:(remainingTime(1)-dt),finalX(:,2),'LineWidth',2);
+% plot(finalTimes,finalX(:,5),'LineWidth',2); hold on
+% plot(finalTimes(1:end-1),diff(finalX(:,6)),'*-','LineWidth',2);
+plot(t,q_dd(:,2),'*-','LineWidth',2);
 set(gcf,'color','w');
 title('x and y vs. Time; $\omega_{slip}$','fontsize',20,'Interpreter','latex')
 xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
@@ -171,10 +171,10 @@ grid on;
 wbreak = wslip;
 separating = 0;
 finalTime = 10;
-while something()
+% while something()
     wbreak = wbreak+rez;
     currentTime = 0;
-    currentX = [0; R; 0; 0; 0; 0; 0; wbreak];
+    currentX = [0 R 0 0 0 0 0 wbreak];
     finalX = [];
     finalLambda = [];
     finalTimes = [];
@@ -182,14 +182,14 @@ while something()
     transitionXs = [];
     
     %Check that we are not already slipping
-    sticking = events_stick(remainingTime(1),currentX)<0;
-    while currentTime<finalTime
-        if sticking
-            options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_stick);         
-            [t,X,te,ye,ie] = ode45(@sys_stick, [currentTime finalTime], currentX, options);
+    sticking = events_stick(currentTime,currentX)<0;
+    % while currentTime<finalTime
+        % if sticking
+            [t,X,te,ye,ie] = ode45(@sys_stick, [currentTime finalTime], currentX, op_stick);
             Lambda = zeros(length(t),2);
+            q_dd = zeros(length(t),4);
             for i = 1:length(t)
-                [~,Lambda(i,1:2)] = dyn_sol_stick(X(i,1:4)',X(i,5:8)',t(i));
+                [q_dd(i,:),Lambda(i,1:2)] = dyn_sol_stick(X(i,1:4)',X(i,5:8)',t(i));
             end
 
             currentTime = te;
@@ -201,12 +201,12 @@ while something()
             transitionXs(end+1,:) = ye;
             sgn_slip = sign(1.5-ie);
             sticking = 0;
-        else
-            options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_slip);         
-            [t,X,te,ye,ie] = ode45(@sys_slip, [currentTime finalTime], currentX, options);
+        % else
+            [t,X,te,ye,ie] = ode45(@sys_slip2, [currentTime finalTime], currentX, op_slip);
             Lambda = zeros(length(t),2);
+            q_dd = zeros(length(t),4);
             for i = 1:length(t)
-                [~,Lambda(i,2)] = dyn_sol_slip(X(i,1:4)',X(i,5:8)',t(i));
+                [q_dd(i,:),Lambda(i,2)] = dyn_sol_slip(X(i,1:4)',X(i,5:8)',t(i));
                 Lambda(i,1) = -sgn_slip*mu*Lambda(i,2);
             end
 
@@ -218,25 +218,25 @@ while something()
             transitionTimes(end+1) = te;
             transitionXs(end+1,:) = ye;
             
-            
 
             %using ie:
             %if we are going back to sticking, sticking = 1
             %if we are separating, separating = 1; break
             
-        end
+        % end
 
 
 
-    end
-end
-w0 = 0.9*wbreak;
-X0 = [0; 0; 0; 0; 0; 0; 0; w0];  %  [x; y; theta; phi; dx; dy; dtheta; dphi];
-options = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_stick);         
-[t, X,te,ye,ie] = ode45(@sys_stick, t_eval, X0, options); 
-Lambda = zeros(length(t),2);
-for i = 1:length(t)
-    [~,Lambda(i,1:2)] = dyn_sol_stick(X(i,1:4)',X(i,5:8)',t(i));
-end
+    % end
+% end
+
+% w0 = 0.9*wbreak;
+% X0 = [0; 0; 0; 0; 0; 0; 0; w0];  %  [x; y; theta; phi; dx; dy; dtheta; dphi];
+% op_stick = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_stick);         
+% [t, X,te,ye,ie] = ode45(@sys_stick, t_eval, X0, op_stick); 
+% Lambda = zeros(length(t),2);
+% for i = 1:length(t)
+%     [~,Lambda(i,1:2)] = dyn_sol_stick(X(i,1:4)',X(i,5:8)',t(i));
+% end
 
 
