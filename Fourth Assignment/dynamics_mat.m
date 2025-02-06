@@ -1,7 +1,6 @@
 function [M,B,G,W,wn,wt] = dynamics_mat(q,q_d)
 
-    global R
-
+    R = 0.6;
     m1 = 5;
     m2 = 15;
     g = 10;
