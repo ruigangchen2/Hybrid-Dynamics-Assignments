@@ -8,19 +8,17 @@ q_d = X(5:8);
 [M,B,G,~,wn,wt] = dynamics_mat(q,q_d);
 alpha = wn*(M\((wn-sgn_slip*mu*wt)'));
 beta = wn*(M\(B+G));
-lambdan = alpha/beta;
+lambdan = beta/alpha;
 
 vt = wt*q_d;
 
-value(1) = lambdan; %consistent slip
+value(1) = vt*sgn_slip; %change in slip dir
 isterminal(1) = 1;
 direction(1) = -1;
 
-% value(2) = -beta; %consistent separation
-% isterminal(2) = 1;
-% direction(2) = -1;
-
-value(2) = vt; %change in slip dir
+value(2) = lambdan; %consistent slip
 isterminal(2) = 1;
-direction(2) = 0;
+direction(2) = -1;
+
+
 
