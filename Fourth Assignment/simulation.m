@@ -442,31 +442,8 @@ while muCritNotReached
     end
 end
 
-%Show smoothness of surfaces
-figure;
-surf(T,P,alpha1)
-figure;
-surf(T,P,alpha2)
-
-%%
-theta =  -pi/6:0.000001:pi/6; 
-phi = -pi:0.000001:pi  ;
-muCrit=0.05:0.01:2;
-
-
-for k=1:length(muCrit)
-    muCrit(k)
-    for i = 1:length(theta)
-        for j = 1:length(phi)
-            [M,~,~,~,wn,wt] = dynamics_mat([NaN NaN theta(i) phi(j)],NaN(4,1));
-            alpha1 = (wn/M)*(wn-muCrit(k)*wt)';
-            alpha2 = (wn/M)*(wn+muCrit(k)*wt)';
-            if alpha1<=0 || alpha2<=0
-                alpha1
-                alpha2
-                muCrit(k)
-                return
-            end
-        end
-    end
-end
+% %Show smoothness of surfaces
+% figure;
+% surf(T,P,alpha1)
+% figure;
+% surf(T,P,alpha2)
