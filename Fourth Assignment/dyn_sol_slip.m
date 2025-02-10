@@ -4,8 +4,12 @@ global sgn_slip
 global mu;
 
 [M,B,G,~,wn,wt] = dynamics_mat(q,q_d);
-alpha = wn*(M\((wn-sgn_slip*mu*wt)'));
-beta = wn*(M\(B+G));
-lambdan = alpha/beta;
+% alpha = wn*(M\((wn-sgn_slip*mu*wt)'));
+% beta = wn*(M\(B+G));
+alpha = (wn/M)*(wn-sgn_slip*mu*wt)';
+beta = (wn/M)*(B+G);
+% alpha = (wn)*inv(M)*(wn-sgn_slip*mu*wt)';
+% beta = (wn)*inv(M)*(B+G);
 
+lambdan = beta/alpha;
 q_dd = M\(-B-G+(wn-sgn_slip*mu*wt)'*lambdan);

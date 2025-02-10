@@ -1,9 +1,9 @@
 function [M,B,G,W,wn,wt] = dynamics_mat(q,q_d)
 
+    R = 0.6;
     m1 = 5;
     m2 = 15;
     g = 10;
-    R = 0.6;
     h = 0.4;
     l = 0.2;
     J1 = 0.1*m1*R^2;
