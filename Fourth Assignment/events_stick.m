@@ -8,6 +8,7 @@ q_d = X(5:8);
 global mu
 lambda = (W*(M\W'))\(W*(M\(B+G)));
 
+
 value(1) = -lambda(1)-mu*lambda(2);
 isterminal(1) = 1;
 direction(1) = 1;
@@ -15,4 +16,3 @@ direction(1) = 1;
 value(2) = lambda(1)-mu*lambda(2);
 isterminal(2) = 1;
 direction(2) = 1;
-
