@@ -1,0 +1,56 @@
+function Xnew = impact_law(Xold)
+
+qminus = Xold(1:4);
+qminus_d = Xold(5:8);
+[Mc,~,~,~,Wtildec] = dynamics_mat(qminus,NaN);
+global mu
+th1minus = qminus(3);
+th2minus = qminus(4);
+xminus_d = qminus_d(1);
+yminus_d = qminus_d(2);
+th1minus_d = qminus_d(3);
+th2minus_d = qminus_d(4);
+l = 0.8;
+
+xtildeminus_d = xminus_d+2*l*th1minus_d*cos(th1minus)+2*l*th2minus_d*cos(th2minus);
+ytildeminus_d = yminus_d-2*l*th1minus_d*sin(th1minus)+2*l*th2minus_d*sin(th2minus);
+
+%Restitution relation
+en = 0;
+et = 0;
+% P = eye(4)-(1+en)*(Wtildec*(Mc\(Wtildec')))\((Mc\(Wtildec'))*Wtildec);
+Ac = Wtildec*(Mc\(Wtildec'));
+LambdaI = [0 -ytildeminus_d/Ac(2,2)];
+LambdaII = -Ac\[xtildeminus_d;ytildeminus_d];
+
+Lambdahat = (1+en)*LambdaI+(1+et)*(LambdaII-LambdaI);
+if abs(Lambdahat(1)) <= mu*Lambdahat(2)
+    kappa = mu*(1+en)*LambdaI(2)/(abs(LambdaII(1))-mu*(LambdaII(2)-LambdaI(2)));
+    Lambda = (1+en)*LambdaI+(kappa)*(LambdaII-LambdaI);
+else
+    Lambda = Lambdahat;
+end
+
+qplus = qminus;
+Deltaq_d = (Mc\(Wtildec'))*Lambda
+qplus_d = Deltaq_d+qminus_d;
+Xnew = [qplus;qplus_d];
+
+Xnew = relabel(Xnew);
+
+if Xnew(6) < 0
+    error('failure; no rear foot separation');
+end
+
+% Before contact, the system will be as I wrote it
+% - During contact, the Wtilde'*lambdatilde term must be added to the ODE,
+% representing the fact that two contact points exist at this time. The
+% *impact* is relating only to tilde-elements of the equation, however,
+% since the other point is in contact already 
+% - We are told that the fixed/stance contact point is not slipping, but we
+% are modeling the dynamic/swing impact point with Chatterjee, which
+% accounts for slipping friction when calculating new tangential velocity 
+% - Will the stance foot somehow be modeled as a pin joint instead of as a
+% holo/non holo constraint? bc otherwise, what do the calcs above look
+% like? are the contact forces of the stance foot considered to be
+% negligible during impact?
