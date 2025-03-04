@@ -1,12 +1,9 @@
-% HW4 Ruigang Chen & Ben Sarfati
+% Final Project Ruigang Chen & Ben Sarfati
 clear all; close all; clc
 
 %% globals and parameters
 
-% global sgn_slip
-global mu
-% sgn_slip = 1;
-mu = 100;
+[~, ~, ~, ~, ~, ~, mu] = model_params();
 rez = 0.01;
 
 %ODE parameters

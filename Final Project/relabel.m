@@ -1,6 +1,6 @@
 function X_relabeled = relabel(X)
 
-l = 0.8;
+[~, ~, ~, l, ~, ~, ~] = model_params();
 x = X(1);
 y = X(2);
 th1 = X(3);

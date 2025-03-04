@@ -3,14 +3,14 @@ function Xnew = impact_law(Xold)
 qminus = Xold(1:4);
 qminus_d = Xold(5:8);
 [Mc,~,~,~,Wtildec] = dynamics_mat(qminus,NaN);
-global mu
+[~, ~, ~, l, ~, ~, mu] = model_params();
+
 th1minus = qminus(3);
 th2minus = qminus(4);
 xminus_d = qminus_d(1);
 yminus_d = qminus_d(2);
 th1minus_d = qminus_d(3);
 th2minus_d = qminus_d(4);
-l = 0.8;
 
 xtildeminus_d = xminus_d+2*l*th1minus_d*cos(th1minus)+2*l*th2minus_d*cos(th2minus);
 ytildeminus_d = yminus_d-2*l*th1minus_d*sin(th1minus)+2*l*th2minus_d*sin(th2minus);

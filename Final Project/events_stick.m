@@ -5,7 +5,7 @@ function [value,isterminal,direction] = events_stick(t,X)
 q = X(1:4);
 q_d = X(5:8);
 [M,B,G,W,~] = dynamics_mat(q,q_d);
-global mu
+[~, ~, ~, ~, ~, ~, mu] = model_params();
 lambda = (W*(M\W'))\(W*(M\(B+G)));
 
 y = q(2); th1 = q(3); th2 = q(4); l = 0.8;
