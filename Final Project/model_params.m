@@ -1,4 +1,4 @@
-function [m, mh, Ic, l, g, alpha, mu] = model_params
+function [m, mh, Ic, l, g, a, mu] = model_params
 
 m = 4;
 mh = 1.8;

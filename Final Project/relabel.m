@@ -17,11 +17,11 @@ ytilde_d = y_d-2*l*th1_d*sin(th1)+2*l*th2_d*sin(th2);
 
 newx = xtilde;
 newy = ytilde;
-newth1 = th2;
-newth2 = th1;
+newth1 = -th2;
+newth2 = -th1;
 newx_d = xtilde_d;
 newy_d = ytilde_d;
-newth1_d = th2_d;
-newth2_d = th1_d;
+newth1_d = -th2_d;
+newth2_d = -th1_d;
 
 X_relabeled = [newx;newy;newth1;newth2;newx_d;newy_d;newth1_d;newth2_d];

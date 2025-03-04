@@ -1,6 +1,6 @@
 function [M,B,G,W,Wtilde] = dynamics_mat(q,q_d)
 
-    [m, mh, Ic, l, g, alpha] = model_params();
+    [m, mh, Ic, l, g, a] = model_params();
 
     th1 = q(3);
     th2 = q(4);
