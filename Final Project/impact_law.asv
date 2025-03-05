@@ -2,15 +2,15 @@ function Xnew = impact_law(Xold)
 
 qminus = Xold(1:4);
 qminus_d = Xold(5:8);
-[Mc,~,~,~,Wtildec] = dynamics_mat(qminus,NaN);
-global mu
+[Mc,~,~,~,Wtildec] = dynamics_mat(qminus,NaN(1,4));
+[~, ~, ~, l, ~, ~, mu] = model_params();
+
 th1minus = qminus(3);
 th2minus = qminus(4);
 xminus_d = qminus_d(1);
 yminus_d = qminus_d(2);
 th1minus_d = qminus_d(3);
 th2minus_d = qminus_d(4);
-l = 0.8;
 
 xtildeminus_d = xminus_d+2*l*th1minus_d*cos(th1minus)+2*l*th2minus_d*cos(th2minus);
 ytildeminus_d = yminus_d-2*l*th1minus_d*sin(th1minus)+2*l*th2minus_d*sin(th2minus);
@@ -20,7 +20,7 @@ en = 0;
 et = 0;
 % P = eye(4)-(1+en)*(Wtildec*(Mc\(Wtildec')))\((Mc\(Wtildec'))*Wtildec);
 Ac = Wtildec*(Mc\(Wtildec'));
-LambdaI = [0 -ytildeminus_d/Ac(2,2)];
+LambdaI = [0; -ytildeminus_d/Ac(2,2)];
 LambdaII = -Ac\[xtildeminus_d;ytildeminus_d];
 
 Lambdahat = (1+en)*LambdaI+(1+et)*(LambdaII-LambdaI);
@@ -31,13 +31,20 @@ else
     Lambda = Lambdahat;
 end
 
+%For intermediate project: do not perform friction cone checks (no-slip
+%assumption)
+Lambda = Lambdahat;
+
 qplus = qminus;
-Deltaq_d = (Mc\(Wtildec'))*Lambda
+Deltaq_d = (Mc\(Wtildec'))*Lambda;
 qplus_d = Deltaq_d+qminus_d;
 Xnew = [qplus;qplus_d];
 
-%Relabelling
-Xnew
+Xnew = relabel(Xnew);
+
+if Xnew(6) <= 0
+    error('failure; no rear foot separation');
+end
 
 % Before contact, the system will be as I wrote it
 % - During contact, the Wtilde'*lambdatilde term must be added to the ODE,

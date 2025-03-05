@@ -1,8 +1,8 @@
 function Xnew = impact_law(Xold)
 
-qminus = Xold(1:4);
-qminus_d = Xold(5:8);
-[Mc,~,~,~,Wtildec] = dynamics_mat(qminus,NaN);
+qminus = Xold(1:4)';
+qminus_d = Xold(5:8)';
+[Mc,~,~,~,Wtildec] = dynamics_mat(qminus,NaN(1,4));
 [~, ~, ~, l, ~, ~, mu] = model_params();
 
 th1minus = qminus(3);
@@ -20,7 +20,7 @@ en = 0;
 et = 0;
 % P = eye(4)-(1+en)*(Wtildec*(Mc\(Wtildec')))\((Mc\(Wtildec'))*Wtildec);
 Ac = Wtildec*(Mc\(Wtildec'));
-LambdaI = [0 -ytildeminus_d/Ac(2,2)];
+LambdaI = [0; -ytildeminus_d/Ac(2,2)];
 LambdaII = -Ac\[xtildeminus_d;ytildeminus_d];
 
 Lambdahat = (1+en)*LambdaI+(1+et)*(LambdaII-LambdaI);
@@ -31,14 +31,18 @@ else
     Lambda = Lambdahat;
 end
 
+%For intermediate project: do not perform friction cone checks (no-slip
+%assumption)
+Lambda = Lambdahat;
+
 qplus = qminus;
-Deltaq_d = (Mc\(Wtildec'))*Lambda
+Deltaq_d = (Mc\(Wtildec'))*Lambda;
 qplus_d = Deltaq_d+qminus_d;
 Xnew = [qplus;qplus_d];
 
 Xnew = relabel(Xnew);
 
-if Xnew(6) < 0
+if Xnew(6) <= 0
     error('failure; no rear foot separation');
 end
 
