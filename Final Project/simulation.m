@@ -20,7 +20,7 @@ op_stick = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_stick);
 % X0 = [0 0 pi/8 -pi/3 0 0 0 0]';
 
 %Initial guess from figure 9b of Gamus and Or 2015m fig. 9b
-% X0 = [0 0 0.75 -0.5 0 0 0 0];
+X0 = [0 0 -0.1665 -0.1665 0 0 0.8033 -0.4490]; 
 
 [t,X,te,ye,ie] = ode45(@sys_stick, t_eval, X0, op_stick); 
 
