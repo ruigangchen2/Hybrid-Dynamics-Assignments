@@ -1,13 +1,21 @@
+%Final project --- Ruigang Chen, Ben Sarfati
 clear; clc;
 
 %% find periodic solution
 
 Z0 = [-0.149, 0.733, -0.501].';
 
-for i = 1:100
-    [Z0_periodic, ~, ~, ~, ~] = fsolve(@(Z)(Poincare_map(Z) - Z), Z0);
-    Z0 = Z0_periodic;
+%Converges after 1 iteration
+numIters = 1;
+Z0_periodic = zeros(3,numIters);
+for i = 1:numIters
+    [Z0_periodic(:,i), ~, ~, ~, ~] = fsolve(@(Z)(Poincare_map(Z) - Z), Z0);
+    Z0 = Z0_periodic(:,i);
 end
+
+% figure; 
+% hold on;
+% plot(Z0_periodic,'markerFaceColor','k');
 
 disp("th1:")
 disp(Z0(1))
@@ -116,7 +124,7 @@ title('Angles vs. Time inlcuding scuffing','fontsize',20,'Interpreter','latex')
 xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
 ylabel('${\theta}$ [rad]', 'Interpreter', 'latex', 'fontsize', 20);
 ylim([-0.3 0.7]);
-legend("${\theta_1(t)}$", "${\theta_2(t)}$", "${\theta_1(t)}$ Relabling","${\theta_2(t)}$ Relabling","Scuffing",'Interpreter','latex','fontsize',20,'location','ne')
+legend("${\theta_1(t)}$", "${\theta_2(t)}$", "${\theta_1(t)}$ Relabeling","${\theta_2(t)}$ Relabeling","Scuffing",'Interpreter','latex','fontsize',20,'location','ne')
 saveas(gcf, 'a.png');
 
 %% Plot b)
