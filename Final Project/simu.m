@@ -253,7 +253,7 @@ fprintf('min_mu：%.4f\n', max_abs_ratio);
 
 %% find periodic solution
 
-mu = 1*min_lam_ratio;
+mu = 1.5*min_lam_ratio;
 Z0slip = [-0.149, 0.733, -0.501, 0].';
 
 numIters = 1;
