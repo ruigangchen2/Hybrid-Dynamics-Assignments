@@ -30,5 +30,8 @@ function [value, isterminal, direction] = events_stick(t,X)
     isterminal(4) = 1;
     direction(4) = 1;
     
-
+    %Scuffing
+    value(5) = th2-th1;
+    isterminal(5) = 0;
+    direction(5) = 1;
 end

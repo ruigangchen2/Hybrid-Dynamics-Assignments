@@ -17,8 +17,6 @@ function Xnew= impact_law(Xold)
     if abs(LambdaHat(1)) <= mu*LambdaHat(2)
         kappa = 1;
     else
-        %should verify that in this case, Lambdat=sigma*mu*Lambdan (see
-        %chatterjee)
         kappa = mu*LambdaI(2)/(abs(LambdaII(1))-mu*(LambdaII(2)-LambdaI(2)));
     end
     

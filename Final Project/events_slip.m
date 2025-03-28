@@ -37,3 +37,8 @@ direction(3) = -1;
 value(4) = th1-th2;
 isterminal(4) = 1;
 direction(4) = 1;
+
+%Scuffing 
+value(5) = th2-th1;
+isterminal(5) = 0;
+direction(5) = 1;
