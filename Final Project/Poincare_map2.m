@@ -31,7 +31,7 @@ sgn_slip = sign(Zold(4));
                     sgn_slip = -1;
                 case 3
                     warning('failure; falling')
-                    Znew = NaN(1,4);
+                    Znew = NaN(4,1);
                     break;
                 case 4
                     temp = impact_law(currentX');
@@ -50,10 +50,12 @@ sgn_slip = sign(Zold(4));
                     sgn_slip = -sgn_slip;
                 case 2
                     warning('failure; stance foot separation')
-                    Znew = NaN(1,4);
+                    Znew = NaN(4,1);
+                    break;
                 case 3
                     warning('failure; falling')
-                    Znew = NaN(1,4);
+                    Znew = NaN(4,1);
+                    break;
                 case 4
                     temp = impact_law(currentX');
                     Znew = temp([3, 7, 8, 5]);

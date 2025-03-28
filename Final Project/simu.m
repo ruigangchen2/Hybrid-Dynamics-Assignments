@@ -251,10 +251,43 @@ fprintf('min_mu：%.4f\n', max_abs_ratio);
 
 %% Q11
 
-%% find periodic solution
+%% Search for periodic solution initial condition
 
-mu = 1.5*min_lam_ratio;
+mu = 0.9*min_lam_ratio;
+
+%%%
+N = 10; % Adjust N as needed for resolution
+
+x = linspace(-0.15, -0.12, N);
+y = linspace(0.4, 1, N);
+z = linspace(-1, 0, N);
+
+[X, Y, Z] = ndgrid(x, y, z);
+
+A = [X(:), Y(:), Z(:), zeros(length(X)^3,1)]'; % Convert to 3x(N^3) array
+%%%
+possibleICs = [];
+for i= 1:length(A)
+    if ~isnan(Poincare_map2(A(:,i)))
+        possibleICs(:,end+1) = A(:,i);
+    end
+end
+
+length(possibleICs)
+cFigure; axisGeom; plotV(possibleICs','.','markersize',20); grid; hold on
+plotV(A','.','markersize',5); grid
+xlabel('x')
+ylabel('y')
+zlabel('z')
+
+Z0slip = mean(possibleICs')';
+%% Periodic Solution
+
 Z0slip = [-0.149, 0.733, -0.501, 0].';
+%From gait B from P.627
+Z0slip = [-0.149, 0.72, -0.51, 0].';
+%From gait C from same figure
+Z0slip = [-0.08, -0.2, -0.45, 0].';
 
 numIters = 1;
 Z0slip_periodic = zeros(4,numIters);
@@ -418,11 +451,6 @@ th1_d = finalX(:,7);
 th2_d = finalX(:,8);
 lambdan = finalLambda(:,2);
 lambdat = finalLambda(:,1);
-
-% indx_scuffing = find(abs(th1-th2) < 0.001 & th1 < 0.1 & th1 > -0.1);
-% t_scuff = t(indx_scuffing);
-% th_scuff = th1(indx_scuffing);
-% indx_collision = find(abs(th1-th2) < 0.001 & (th1 > 0.1 | th1 < -0.1));
 
 %% plot (a) 
 
