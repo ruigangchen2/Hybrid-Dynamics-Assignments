@@ -1,5 +1,6 @@
 function [value, isterminal, direction] = events_stick(t,X)
-    [~, ~, ~, l, ~, ~, mu] = model_params;
+    global mu;
+    [~, ~, ~, l, ~, ~] = model_params;
     [~, lambda]=dyn_sol_stick(t,X);
     
     y = X(2); 

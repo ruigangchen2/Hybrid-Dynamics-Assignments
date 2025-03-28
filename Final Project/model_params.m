@@ -1,4 +1,4 @@
-function [m, mh, Ic, l, g, a, mu] = model_params
+function [m, mh, Ic, l, g, a] = model_params
 
     m = 4;
     mh = 1.8;
@@ -6,6 +6,5 @@ function [m, mh, Ic, l, g, a, mu] = model_params
     l = 0.8;
     g = 10;
     a = deg2rad(1.5);
-    mu = 1;
 
 end
