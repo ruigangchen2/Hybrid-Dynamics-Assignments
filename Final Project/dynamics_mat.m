@@ -1,5 +1,5 @@
 function [M, B, G, W, dW, Wtilde] = dynamics_mat(X)
-    [m, mh, Ic, l, g, a, ~] = model_params;
+    [m, mh, Ic, l, g, a] = model_params;
 
     th1 = X(3);
     th2 = X(4);
