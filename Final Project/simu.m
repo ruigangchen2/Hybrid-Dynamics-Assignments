@@ -16,6 +16,7 @@ for i = 1:numIters
     Z0 = Z0_periodic(:,i);
 end
 
+
 disp("th1:")
 disp(Z0(1))
 disp("th2:")
@@ -99,7 +100,7 @@ y_d = X_data(:, 6);
 th1_d = X_data(:, 7);
 th2_d = X_data(:, 8);
 
-%% Plot a)
+%% Plot stick a)
 
 figure;
 plot(t_data(1), th1(1), 'r-', 'LineWidth', 2)
@@ -137,11 +138,10 @@ xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
 ylabel('${\theta}$ [rad]', 'Interpreter', 'latex', 'fontsize', 20);
 ylim([-0.3 0.7]);
 legend("${\theta_1(t)}$", "${\theta_2(t)}$", "${\theta_1(t)}$ Relabeling","${\theta_2(t)}$ Relabeling","Scuffing",'Interpreter','latex','fontsize',20,'location','ne')
-xlim([0 2.5])
 
 saveas(gcf, 'a.png');
 
-%% Plot b)
+%% Plot stick b)
 figure;
 plot(th1(1), th1_d(1), 'r-', 'LineWidth', 2)
 hold on
@@ -192,7 +192,7 @@ legend("${\theta_1(t)}$", "${\theta_2(t)}$", "Relabeling", "Relabeling", "Scuffi
 saveas(gcf, 'b.png');
 
 
-%% Plot c)
+%% Plot stick c)
 lambda_t_data = [];
 lambda_n_data = [];
 for i = 1:length(t_data)
@@ -210,11 +210,10 @@ xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
 ylabel('$\lambda_n$ [N]', 'Interpreter', 'latex', 'fontsize', 20);
 legend("$\lambda_n$",'Interpreter','latex','fontsize',20,'location','ne')
 ylim([-10 140]);
-xlim([0 2.5])
 
 saveas(gcf, 'c.png');
 
-%% Plot d)
+%% Plot stick d)
 
 figure;
 plot(t_data, lambda_t_data./lambda_n_data, '-', 'LineWidth', 2)
@@ -240,18 +239,17 @@ xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
 ylabel('Force ratio', 'Interpreter', 'latex', 'fontsize', 20);
 ylim([-1.2 1.2]);
 legend("${\lambda_t/\lambda_n}$", "${\Lambda_t/\Lambda_n}$", "$\pm \mu$", 'Interpreter','latex','fontsize',20,'location','ne')
-xlim([0 2.5])
 
 saveas(gcf, 'd.png');
 
-%% Q6
+%% Q6 stick
 
 min_lam_ratio = max(abs(lambda_t_data ./ lambda_n_data));
 min_Lam_ratio = max(abs(LAMBDA_t_data./LAMBDA_n_data));
 max_abs_ratio = max(min_lam_ratio, min_Lam_ratio);
 fprintf('min_mu：%.4f\n', max_abs_ratio);
 
-%% Q7
+%% Q7 stick
 sigma = 1;
 sigma_ = -1;
 A = [];
@@ -296,7 +294,7 @@ legend("$\mu=0.1$", "$\mu=0.2$", "$\mu=0.4$","$\mu=0.6109$", 'Interpreter','late
 saveas(gcf, 'Q7.png');
 
 
-%% Q8
+%% Q8 stick
 jacobian_real = jacobian + eye(size(jacobian))
 eigen = eig(jacobian_real)
 lambda = abs(eigen)
@@ -337,10 +335,9 @@ Z0slip = [-0.149, 0.733, -0.501, 0].';
 numIters = 1;
 Z0slip_periodic = zeros(4,numIters);
 for i = 1:numIters
-    [Z0slip, ~, ~, ~, ~] = fsolve(@(Z)(Poincare_map2(Z) - Z), Z0slip);
+    [Z0slip, ~, ~, ~, jacobian_slip] = fsolve(@(Z)(Poincare_map2(Z) - Z), Z0slip);
     Z0slip_periodic(:,i) = Z0slip;
 end
-
 
 
 X0 = [0 0 Z0slip(1) Z0slip(1) Z0slip(4) 0 Z0slip(2) Z0slip(3)]
@@ -534,7 +531,7 @@ th2_d = finalX(:,8);
 lambdan = finalLambda(:,2);
 lambdat = finalLambda(:,1);
 
-%% plot (a) 
+%% plot slip + stick (a) 
 
 figure;
 h1 = plot(t(stickInds),th1(stickInds),'LineWidth',2,'color','r'); hold on
@@ -546,7 +543,7 @@ set(gcf,'color','w');
 title('Angles vs. Time including scuffing','fontsize',20,'Interpreter','latex')
 xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
 ylabel('${\theta}$ [rad]', 'Interpreter', 'latex', 'fontsize', 20);
-xlim([0 2.5])
+ylim([-0.3 0.7]);
 
 plot(scuffTimes, scuffXs(:,3), 'k*', 'LineWidth', 2)
 
@@ -555,20 +552,15 @@ for i = find(relabelInds)'
     plot(t(i:2:i+2),th2(i:2:i+2),':','LineWidth',2,'Color',h2.Color)
 end
 legend("${\theta_1(t)}$ stick", "${\theta_2(t)}$ stick", "${\theta_1(t)}$ slip","${\theta_2(t)}$ slip","Scuffing","Relabel","Relabel",'Interpreter','latex','fontsize',20,'location','ne')
-saveas(gcf, 'e.png');
+saveas(gcf, 'slip + stick (a).png');
 
-%% plot (b)
+%% plot slip + stick (b)
 
 figure;
 h1 = plot(th1(stickInds),th1_d(stickInds),'LineWidth',2,'color','r'); hold on
 h2 = plot(th2(stickInds),th2_d(stickInds),'LineWidth',2,'color','b');
 plot(th1(~stickInds),th1_d(~stickInds),'--','Color',h1.Color)
 plot(th2(~stickInds),th2_d(~stickInds),'--','Color',h2.Color)
-
-for i = find(relabelInds,1)'
-    plot(th1(i:2:i+2),th1_d(i:2:i+2),':','LineWidth',2,'Color',h1.Color)
-    plot(th2(i:2:i+2),th2_d(i:2:i+2),':','LineWidth',2,'Color',h2.Color)
-end
 
 % Scuffing:
 plot(scuffXs(:,3), scuffXs(:,7), 'ko', 'LineWidth', 3)
@@ -578,14 +570,21 @@ plot(scuffXs(:,4), scuffXs(:,8), 'ko', 'LineWidth', 3,'HandleVisibility', 'off')
 plot(collisionXs(:,3), collisionXs(:,7), 'kx', 'LineWidth', 3)
 plot(collisionXs(:,4), collisionXs(:,8), 'kx', 'LineWidth', 3,'HandleVisibility', 'off')
 
+for i = find(relabelInds,1)'
+    plot(th1(i:2:i+2),th1_d(i:2:i+2),':','LineWidth',2,'Color',h1.Color)
+    plot(th2(i:2:i+2),th2_d(i:2:i+2),':','LineWidth',2,'Color',h2.Color)
+end
+
 legend("${\theta_1(t)}$ stick", "${\theta_2(t)}$ stick", "${\theta_1(t)}$ slip","${\theta_2(t)}$ slip","Scuffing","collision",'Interpreter','latex','fontsize',20,'location','se')
 set(gcf,'color','w');
 title('Phase Plane Trajectories','fontsize',20,'Interpreter','latex')
 xlabel('${\theta}$ [rad/s]', 'Interpreter', 'latex', 'fontsize', 20);
 ylabel('${\dot\theta}$ [rad]', 'Interpreter', 'latex', 'fontsize', 20);
-saveas(gcf, 'f.png');
+ylim([-2 2]);
+xlim([-0.25 0.55]);
+saveas(gcf, 'slip + stick (b).png');
 
-%% plot (c)
+%% plot slip + stick (c)
 
 figure;
 h1 = plot(t(stickInds),lambdan(stickInds),'LineWidth',2,'color','r'); hold on
@@ -600,22 +599,14 @@ for i = find(relabelInds)'
     plot(t(i:2:i+2),lambdan(i:2:i+2),':','LineWidth',2,'Color',h1.Color)
 end
 plot([t_data(1) t_data(end)], [0 0], 'k-.', 'LineWidth', 2);
-
+ylim([-10 140]);
 legend("$\lambda_n$",'relabel','Interpreter','latex','fontsize',20,'location','ne')
-xlim([0 2.5])
-saveas(gcf, 'g.png');
+saveas(gcf, 'slip + stick (c).png');
 
-%% plot (d)
+%% plot slip + stick (d)
 
 figure;
 h1 = plot(t(stickInds),lambdat(stickInds)./lambdan(stickInds),'LineWidth',2,'color','r'); hold on
-plot(t(~stickInds),lambdat(~stickInds)./lambdan(~stickInds),'--','LineWidth',2,'Color',h1.Color);
-
-set(gcf,'color','w');
-title('Force ratio vs. Time','fontsize',20,'Interpreter','latex')
-xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
-ylabel('$\frac{\lambda_{t}}{\lambda_{n}}$', 'Interpreter', 'latex', 'fontsize', 20);
-
 
 LAMBDA_t_data = [];
 LAMBDA_n_data = [];
@@ -633,8 +624,22 @@ for i = find(relabelInds)'
     plot(t(i:2:i+2),lambdat(i:2:i+2)./lambdan(i:2:i+2),':','LineWidth',2,'Color',h1.Color)
 end
 
+plot(t(~stickInds),lambdat(~stickInds)./lambdan(~stickInds),'--','LineWidth',2,'Color',h1.Color);
+
+set(gcf,'color','w');
+title('Force ratio vs. Time','fontsize',20,'Interpreter','latex')
+xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
+ylabel('$\frac{\lambda_{t}}{\lambda_{n}}$', 'Interpreter', 'latex', 'fontsize', 20);
+
+
 yline(mu)
 yline(-mu)
 legend("$\frac{\lambda_t}{\lambda_n}$","$\frac{\Lambda_t}{\Lambda_n}$",'relabel','Interpreter','latex','fontsize',20,'location','ne')
-xlim([0 2.5])
-saveas(gcf, 'h.png');
+ylim([-0.4 0.4])
+saveas(gcf, 'slip + stick (d).png');
+
+
+%% Q8 slip + stick
+jacobian_slip_real = jacobian_slip + eye(size(jacobian_slip))
+eigen = eig(jacobian_slip_real)
+lambda = abs(eigen)
