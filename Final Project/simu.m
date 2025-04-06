@@ -141,6 +141,8 @@ xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
 ylabel('${\theta}$ [rad]', 'Interpreter', 'latex', 'fontsize', 20);
 ylim([-0.3 0.7]);
 legend("${\theta_1(t)}$", "${\theta_2(t)}$", "${\theta_1(t)}$ Relabeling","${\theta_2(t)}$ Relabeling","Scuffing",'Interpreter','latex','fontsize',20,'location','ne')
+xlim([0 2.5])
+
 saveas(gcf, 'a.png');
 
 %% Plot b)
@@ -212,6 +214,8 @@ xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
 ylabel('$\lambda_n$ [N]', 'Interpreter', 'latex', 'fontsize', 20);
 legend("$\lambda_n$",'Interpreter','latex','fontsize',20,'location','ne')
 ylim([-10 140]);
+xlim([0 2.5])
+
 saveas(gcf, 'c.png');
 
 %% Plot d)
@@ -240,6 +244,8 @@ xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
 ylabel('Force ratio', 'Interpreter', 'latex', 'fontsize', 20);
 ylim([-1.2 1.2]);
 legend("${\lambda_t/\lambda_n}$", "${\Lambda_t/\Lambda_n}$", "$\pm \mu$", 'Interpreter','latex','fontsize',20,'location','ne')
+xlim([0 2.5])
+
 saveas(gcf, 'd.png');
 
 %% Q6
@@ -259,24 +265,13 @@ Z0slip = [-0.149, 0.733, -0.501, 0].';
 numIters = 1;
 Z0slip_periodic = zeros(4,numIters);
 for i = 1:numIters
-    [Z0slip_periodic(:,i), ~, ~, ~, ~] = fsolve(@(Z)(Poincare_map2(Z) - Z), Z0slip);
-    Z0slip = Z0slip_periodic(:,i);
+    [Z0slip, ~, ~, ~, ~] = fsolve(@(Z)(Poincare_map2(Z) - Z), Z0slip);
+    Z0slip_periodic(:,i) = Z0slip;
 end
 
-% figure; 
-% hold on;
-% plot(Z0_periodic,'markerFaceColor','k');
-
-disp("th1:")
-disp(Z0slip(1))
-disp("th2:")
-disp(Z0slip(1))
-disp("th1_d:")
-disp(Z0slip(2))
-disp("th2_d:")
-disp(Z0slip(3))
-disp("x_d:")
-disp(Z0slip(4))
+figure; 
+hold on;
+plot(Z0slip_periodic','o','markerFaceColor','k');
 
 X0 = [0 0 Z0slip(1) Z0slip(1) Z0slip(4) 0 Z0slip(2) Z0slip(3)]
 
@@ -297,12 +292,62 @@ collisionTimes = [];
 
 currentX = X0;
 currentTime = 0;
+rez = 0.0001;
 finalTime = 10;
 op_stick = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_stick);         
-op_slip = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_slip);         
+op_slip = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_slip);    
+op_slip2 = odeset('RelTol', 1e-8, 'AbsTol', 1e-8,'Events',@events_slip_noImpact);   
 iter = 1;
 
 while currentTime<finalTime
+    
+    %Check if there is immediate post-impact slippage
+    [value, ~, direction] = events_stick(currentTime,currentX);
+    sticking = value(1:3).*direction(1:3)<0;
+    if sum(sticking) ~= 3
+        if ~sticking(3)
+            warning('failure; falling')
+            Znew = NaN(4,1);
+            return;
+        else
+            sgn_slip = sign(1.5-find(~sticking(1:2)));
+        end
+
+        %Run a tiny bit to remove false impact from numerical error
+        [t,X,~,~,ie] = ode45(@sys_slip, [currentTime:rez:currentTime+100*rez], currentX, op_slip2);
+        currentTime = t(end);
+        currentX = X(end,:);
+        
+        Lambda = zeros(length(t),2);
+        for i = 1:length(t)
+            [~,Lambda(i,2)] = dyn_sol_slip(t(i),X(i,:)');
+            Lambda(i,1) = -sgn_slip*mu*Lambda(i,2);
+        end
+
+        %Record results 
+        finalX = [finalX;X(1:end-1,:);NaN(1,size(X,2))];
+        finalTimes = [finalTimes;t(1:end-1);NaN];
+        finalLambda = [finalLambda;Lambda(1:end-1,:);NaN(1,size(Lambda,2))];
+        stickInds = [stickInds; false(length(t),1)];
+        relabelInds = [relabelInds; false(length(t),1)];
+
+        %Update state (assume end time will not be encountered here)
+        if ~isempty(ie)
+            switch ie(end)
+                case 1
+                    sgn_slip = -sgn_slip;
+                case 2
+                    warning('failure; stance foot separation')
+                    Znew = NaN(4,1);
+                    return;
+                case 3
+                    warning('failure; falling')
+                    Znew = NaN(4,1);
+                    return;
+            end
+        end
+    end
+    
     %Check slipping or sticking
     [value, ~, direction] = events_stick(currentTime,currentX);
     if value(1:3).*direction(1:3) < 0
@@ -431,6 +476,7 @@ set(gcf,'color','w');
 title('Angles vs. Time including scuffing','fontsize',20,'Interpreter','latex')
 xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
 ylabel('${\theta}$ [rad]', 'Interpreter', 'latex', 'fontsize', 20);
+xlim([0 2.5])
 
 plot(scuffTimes, scuffXs(:,3), 'k*', 'LineWidth', 2)
 
@@ -439,6 +485,7 @@ for i = find(relabelInds)'
     plot(t(i:2:i+2),th2(i:2:i+2),':','LineWidth',2,'Color',h2.Color)
 end
 legend("${\theta_1(t)}$ stick", "${\theta_2(t)}$ stick", "${\theta_1(t)}$ slip","${\theta_2(t)}$ slip","Scuffing","Relabel","Relabel",'Interpreter','latex','fontsize',20,'location','ne')
+saveas(gcf, 'e.png');
 
 %% plot (b)
 
@@ -466,6 +513,7 @@ set(gcf,'color','w');
 title('Phase Plane Trajectories','fontsize',20,'Interpreter','latex')
 xlabel('${\theta}$ [rad/s]', 'Interpreter', 'latex', 'fontsize', 20);
 ylabel('${\dot\theta}$ [rad]', 'Interpreter', 'latex', 'fontsize', 20);
+saveas(gcf, 'f.png');
 
 %% plot (c)
 
@@ -484,6 +532,8 @@ end
 plot([t_data(1) t_data(end)], [0 0], 'k-.', 'LineWidth', 2);
 
 legend("$\lambda_n$",'relabel','Interpreter','latex','fontsize',20,'location','ne')
+xlim([0 2.5])
+saveas(gcf, 'g.png');
 
 %% plot (d)
 
@@ -516,3 +566,5 @@ end
 yline(mu)
 yline(-mu)
 legend("$\frac{\lambda_t}{\lambda_n}$","$\frac{\Lambda_t}{\Lambda_n}$",'relabel','Interpreter','latex','fontsize',20,'location','ne')
+xlim([0 2.5])
+saveas(gcf, 'h.png');
