@@ -12,13 +12,9 @@ Z0 = [-0.149, 0.733, -0.501].';
 numIters = 1;
 Z0_periodic = zeros(3,numIters);
 for i = 1:numIters
-    [Z0_periodic(:,i), ~, ~, ~, ~] = fsolve(@(Z)(Poincare_map(Z) - Z), Z0);
+    [Z0_periodic(:,i), ~, ~, ~, jacobian] = fsolve(@(Z)(Poincare_map(Z) - Z), Z0);
     Z0 = Z0_periodic(:,i);
 end
-
-% figure; 
-% hold on;
-% plot(Z0_periodic,'markerFaceColor','k');
 
 disp("th1:")
 disp(Z0(1))
@@ -255,9 +251,85 @@ min_Lam_ratio = max(abs(LAMBDA_t_data./LAMBDA_n_data));
 max_abs_ratio = max(min_lam_ratio, min_Lam_ratio);
 fprintf('min_mu：%.4f\n', max_abs_ratio);
 
-%% Q11
+%% Q7
+sigma = 1;
+sigma_ = -1;
+A = [];
+A_ = [];
+B = [];
 
-%% Periodic Solution
+for i = 1:length(t_data)
+    A = [A; -((100*sigma*sin(2*th2(i))+741*sigma*sin(2*th1(i)))/(400*cos(2*th1(i)+2*th2(i))-1282))];
+    A_ = [A_; -((100*sigma_*sin(2*th2(i))+741*sigma_*sin(2*th1(i)))/(400*cos(2*th1(i)+2*th2(i))-1282))];
+    B = [B; ((741*cos(2*th1(i))-100*cos(2*th2(i))+200*cos(2*th1(i)+2*th2(i))-931)/(400*cos(2*th1(i)+2*th2(i))-1282))];
+end
+
+epsilon = 1e-5;
+mu = 0;
+alpha = A * mu + B;
+alpha_ = A_ * mu + B;
+
+while true
+    alpha = A * mu + B;
+    alpha_ = A_ * mu + B;
+
+    if any(alpha < 0) || any(alpha_ < 0)
+        break;
+    end
+
+    mu = mu + epsilon
+end
+
+figure;
+plot(t_data, A * 0.1 + B, '-', 'LineWidth', 2)
+hold on
+plot(t_data, A * 0.2 + B, '-', 'LineWidth', 2)
+plot(t_data, A * 0.4 + B, '-', 'LineWidth', 2)
+plot(t_data, A * 0.6109 + B, '-.', 'LineWidth', 2)
+plot([t_data(1) t_data(end)], [0 0], 'k--', 'LineWidth', 2);
+
+title('$\alpha$ vs. Time','fontsize',20,'Interpreter','latex')
+xlabel('Time [s]', 'Interpreter', 'latex', 'fontsize', 20);
+ylabel('$\alpha$', 'Interpreter', 'latex', 'fontsize', 20);
+ylim([-0.1, 0.8]);
+legend("$\mu=0.1$", "$\mu=0.2$", "$\mu=0.4$","$\mu=0.6109$", 'Interpreter','latex','fontsize',20,'location','ne')
+saveas(gcf, 'Q7.png');
+
+
+%% Q8
+jacobian_real = jacobian + eye(size(jacobian))
+eigen = eig(jacobian_real)
+lambda = abs(eigen)
+
+Z_star = [-0.1665 , 0.8033, -0.4490].';
+Z0 = [-0.149, 0.733, -0.501].'; 
+
+num_steps = 15; 
+Psi_k = zeros(1, num_steps);
+Psi_k(1) = Z0(1);
+
+Z_current = Z0;
+for k = 2:num_steps
+    Z_next = Poincare_map(Z_current);
+    Psi_k(k) = Z_next(1);
+    Z_current = Z_next;  
+end
+
+
+figure;
+stem(1:num_steps, Psi_k, 'filled', 'b'); 
+hold on;
+plot([1 num_steps], [-0.1665 -0.1665], 'k--', 'LineWidth', 1.5);  
+
+title('Discrete-time series of angles at impact','fontsize',20,'Interpreter','latex')
+xlabel('Impact number k', 'Interpreter', 'latex', 'fontsize', 20);
+ylabel('$\Psi_k$ [rad]', 'Interpreter', 'latex', 'fontsize', 20);
+ylim([-0.25, 0]);
+legend("$\Psi_k$", "$\theta^*$", 'Interpreter','latex','fontsize',20,'location','ne')
+saveas(gcf, 'Q8.png');
+
+%% Q11
+% Periodic Solution
 mu = 0.9*min_lam_ratio;
 
 Z0slip = [-0.149, 0.733, -0.501, 0].';
@@ -269,9 +341,7 @@ for i = 1:numIters
     Z0slip_periodic(:,i) = Z0slip;
 end
 
-figure; 
-hold on;
-plot(Z0slip_periodic','o','markerFaceColor','k');
+
 
 X0 = [0 0 Z0slip(1) Z0slip(1) Z0slip(4) 0 Z0slip(2) Z0slip(3)]
 
